@@ -1,5 +1,5 @@
 import { database } from '../../database/pg';
-import { ClientsProps } from '../../types';
+import { ClientsProps, ListClientsProps } from '../../types';
 
 interface ValidateBalanceProps {
   value: number;
@@ -16,7 +16,7 @@ export const validateBalance = async ({
   id,
   value,
 }: ValidateBalanceProps): Promise<boolean> => {
-  const clientBalance = await database<ClientsProps>('clients')
+  const clientBalance = await database<ListClientsProps>('clients')
     .where({ id })
     .first()
     .select('balance');
@@ -26,6 +26,25 @@ export const validateBalance = async ({
   } else {
     return true;
   }
+};
 
-  return false;
+export const proccessToStoreClient = async (
+  client: ClientsProps
+): Promise<ClientsProps | boolean> => {
+  const searchForDuplicate = await database('clients')
+    .where({ name: client.name })
+    .first();
+
+  if (searchForDuplicate) {
+    return false;
+  }
+
+  const newClient: ListClientsProps[] = await database('clients')
+    .insert({
+      balance: client.balance,
+      name: client.name,
+    })
+    .returning('*');
+
+  return newClient[0];
 };

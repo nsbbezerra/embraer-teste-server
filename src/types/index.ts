@@ -1,9 +1,14 @@
 interface ClientsProps {
+  name: string;
+  balance: number;
+}
+
+interface ListClientsProps {
   id: number;
   name: string;
   balance: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 interface BanknotesProps {
@@ -20,4 +25,4 @@ interface StatementsProps {
   updatedAt: Date;
 }
 
-export type { ClientsProps, BanknotesProps, StatementsProps };
+export type { ClientsProps, BanknotesProps, StatementsProps, ListClientsProps };
