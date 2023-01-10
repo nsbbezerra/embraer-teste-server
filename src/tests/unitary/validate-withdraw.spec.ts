@@ -1,5 +1,8 @@
 import { validateBalanceInMemory } from '../../repositories/in-memory/InMemoryClientsRepository';
-import { haveBalance } from '../../services/WithdrawServices';
+import {
+  haveBalance,
+  isValidValueToWithdraw,
+} from '../../services/WithdrawServices';
 
 describe('Withdraw Tests', () => {
   it('should be that i have balance for withdraw', async () => {
@@ -30,5 +33,15 @@ describe('Withdraw Tests', () => {
     });
 
     expect(response).toBeFalsy();
+  });
+
+  it('should be able to whitdraw this value', () => {
+    const validate = isValidValueToWithdraw(50);
+    expect(validate).toBeTruthy();
+  });
+
+  it('should be not able to whitdraw this value', () => {
+    const validate = isValidValueToWithdraw(50.65);
+    expect(validate).toBeFalsy();
   });
 });

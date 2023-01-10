@@ -8,10 +8,8 @@ interface ClientsProps {
 
 interface BanknotesProps {
   id: number;
-  banknoteValue: string;
+  banknoteValue: number;
   amount: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 interface StatementsProps {

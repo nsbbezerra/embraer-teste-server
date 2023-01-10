@@ -1,4 +1,4 @@
-const withdrawMock = [
+const banknotesMock = [
   {
     id: 5,
     banknoteValue: 100,
@@ -29,4 +29,4 @@ const withdrawMock = [
   },
 ];
 
-export { withdrawMock };
+export { banknotesMock };

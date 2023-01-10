@@ -23,3 +23,16 @@ export const haveBalance = async ({
 }: HaveBalanceProps) => {
   return await repository({ value, id });
 };
+
+/**
+ * @param value number
+ * @returns boolean
+ */
+
+export const isValidValueToWithdraw = (value: number): boolean => {
+  if (Number.isInteger(value)) {
+    return true;
+  } else {
+    return false;
+  }
+};
