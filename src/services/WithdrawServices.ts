@@ -9,6 +9,27 @@ interface HaveBalanceProps {
   repository: ({ value, id }: ValidateBalanceProps) => Promise<boolean>;
 }
 
+interface BanknotesValidToWithdrawProps {
+  id: number;
+  banknoteValue: number;
+  quantity: number;
+}
+
+type CalculateHowMuchBanksnoteNeededResponse = {
+  banknotes: BanknotesValidToWithdrawProps[] | null;
+  status: 'success' | 'not authorized';
+  message: string | undefined;
+};
+
+interface ProccessWithdrawProps {
+  value: number;
+  repository: ({
+    value,
+  }: {
+    value: number;
+  }) => Promise<CalculateHowMuchBanksnoteNeededResponse>;
+}
+
 /**
  * @param id number
  * @param value number
@@ -35,4 +56,19 @@ export const isValidValueToWithdraw = (value: number): boolean => {
   } else {
     return false;
   }
+};
+
+/**
+ * @param repository countBankNotesInMemory | countBankNotes
+ * @param value number
+ * @returns an object with a `banknote`: Array<BanknotesValidToWithdrawProps> | null, `status`: 'success' | 'not authorized', `message`: string | undefined.
+ */
+
+export const proccessWithdraw = async ({
+  repository,
+  value,
+}: ProccessWithdrawProps): Promise<CalculateHowMuchBanksnoteNeededResponse> => {
+  const data = await repository({ value });
+
+  return data;
 };

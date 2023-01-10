@@ -11,7 +11,7 @@ router.get('/clientBalance', FindForBalance);
 
 /** WITHDRAW */
 
-router.post('/withdraw', WithDraw);
+router.post('/withdraw/:client', WithDraw);
 
 /** STATEMENTS */
 

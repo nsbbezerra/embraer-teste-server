@@ -1,4 +1,4 @@
-import { banknotesMock } from '../../mocks/banknotes';
+import { database } from '../../database/pg';
 import { BanknotesProps } from '../../types';
 
 interface BanknotesRepositoryProps {
@@ -67,10 +67,13 @@ function calculateHowMuchBanknotesNeeded({
  * @returns an object with a `banknote`: Array<BanknotesValidToWithdrawProps> | null, `status`: 'success' | 'not authorized', `message`: string | undefined.
  */
 
-export const countBankNotesInMemory = async ({
+export const countBankNotes = async ({
   value,
 }: BanknotesRepositoryProps): Promise<CalculateHowMuchBanksnoteNeededResponse> => {
-  const banknotes = banknotesMock;
+  const banknotes = await database<BanknotesProps>('banknotes').orderBy(
+    'banknoteValue',
+    'desc'
+  );
 
   let validsBanknotes: BanknotesValidToWithdrawProps[] = [];
   let balance = value;

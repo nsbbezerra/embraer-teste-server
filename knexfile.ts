@@ -1,3 +1,6 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import path from 'path';
 import { configs } from './src/configs';
 
