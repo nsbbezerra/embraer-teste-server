@@ -1,15 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import { proccessToStoreClient } from '../../repositories/knex/ClientsRepository';
-import { storeClient } from '../../services/ClientServices';
-import { ClientsProps } from '../../types';
+import { KnexClientsRepository } from '../../repositories/knex/ClientsRepository';
+import { findForBalance } from '../../services/ClientBalanceService';
+import { createClient } from '../../services/CreateClientServices';
 
 async function FindForBalance(
-  request: Request,
+  request: Request<{ id: number }, {}, {}>,
   response: Response,
   next: NextFunction
 ) {
+  const { id } = request.params;
+
   try {
-    const balance = 0;
+    const balance = await findForBalance({
+      id,
+      repository: new KnexClientsRepository(),
+    });
+
     return response.status(200).json(balance);
   } catch (error) {
     next(error);
@@ -22,19 +28,16 @@ async function StoreClient(
   next: NextFunction
 ) {
   const { name, balance } = request.body;
-  try {
-    const client = await storeClient({
-      client: { name, balance },
-      repository: proccessToStoreClient,
-    });
 
-    if (!client) {
-      throw new Error('This client has already been registered');
-    }
+  try {
+    const client = await createClient({
+      client: { name, balance },
+      repository: new KnexClientsRepository(),
+    });
 
     return response
       .status(201)
-      .json({ message: 'Registration successfully complete', client });
+      .json({ message: 'Your account has been created successfully', client });
   } catch (error) {
     next(error);
   }

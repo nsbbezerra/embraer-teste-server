@@ -1,123 +1,18 @@
 import { banknotesMock } from '../../mocks/banknotes';
 import { BanknotesProps } from '../../types';
+import { BanksnotesRepository } from '../banknotesRepository';
 
-interface BanknotesRepositoryProps {
-  value: number;
-}
+export class InMemoryBanknotesRepository implements BanksnotesRepository {
+  private items: BanknotesProps[] = banknotesMock;
 
-interface BanknotesValidToWithdrawProps {
-  id: number;
-  banknoteValue: number;
-  quantity: number;
-}
-
-type HowMuchBanknotesNeededProps = {
-  banknote: BanknotesProps;
-  totalToWithdraw: number;
-};
-
-type HowMuchBanknotesNeededResponseProps = {
-  rest: number;
-  totalOfBanknotes: number;
-};
-
-type CalculateHowMuchBanksnoteNeededResponse = {
-  banknotes: BanknotesValidToWithdrawProps[] | null;
-  status: 'success' | 'not authorized';
-  message: string | undefined;
-};
-
-type ThereAreAvailableBanknotesProps = {
-  stock: number;
-  valueToWithdraw: number;
-  banknoteValue: number;
-};
-
-function ifThereAreAvailableBanknotes({
-  stock,
-  valueToWithdraw,
-  banknoteValue,
-}: ThereAreAvailableBanknotesProps): boolean {
-  const calculateHowMuchBanknotesNeeded = Math.floor(
-    valueToWithdraw / banknoteValue
-  );
-
-  if (calculateHowMuchBanknotesNeeded > stock) {
-    return false;
-  } else {
-    return true;
+  async find(): Promise<BanknotesProps[]> {
+    return this.items;
   }
-}
 
-function calculateHowMuchBanknotesNeeded({
-  banknote,
-  totalToWithdraw,
-}: HowMuchBanknotesNeededProps): HowMuchBanknotesNeededResponseProps {
-  let rest = totalToWithdraw;
-  let totalOfBanknotes: number = 0;
-  while (rest >= banknote.banknoteValue) {
-    rest = rest - banknote.banknoteValue;
-    totalOfBanknotes++;
-  }
-  return { rest, totalOfBanknotes };
-}
-
-/**
- * @param value number
- * @returns an object with a `banknote`: Array<BanknotesValidToWithdrawProps> | null, `status`: 'success' | 'not authorized', `message`: string | undefined.
- */
-
-export const countBankNotesInMemory = async ({
-  value,
-}: BanknotesRepositoryProps): Promise<CalculateHowMuchBanksnoteNeededResponse> => {
-  const banknotes = banknotesMock;
-
-  let validsBanknotes: BanknotesValidToWithdrawProps[] = [];
-  let balance = value;
-
-  /** Start of banknotes counting */
-
-  banknotes.map((banknote) => {
-    if (
-      ifThereAreAvailableBanknotes({
-        stock: banknote.amount,
-        valueToWithdraw: value,
-        banknoteValue: banknote.banknoteValue,
-      })
-    ) {
-      const { rest, totalOfBanknotes } = calculateHowMuchBanknotesNeeded({
-        banknote,
-        totalToWithdraw: balance,
-      });
-      balance = rest;
-      if (totalOfBanknotes !== 0) {
-        validsBanknotes.push({
-          id: banknote.id,
-          banknoteValue: banknote.banknoteValue,
-          quantity: totalOfBanknotes,
-        });
-      }
+  async update(id: number, amount: number): Promise<void> {
+    const banknote = this.items.find((obj) => obj.id === id);
+    if (banknote) {
+      banknote.amount = banknote.amount - amount;
     }
-  });
-
-  /** Check if there is remainder of the withdrawal amount */
-
-  const isThereRest = validsBanknotes.reduce((sum, a) => {
-    return sum + a.quantity * a.banknoteValue;
-  }, 0);
-
-  if (isThereRest < value) {
-    return {
-      banknotes: null,
-      message:
-        'Unable to process withdrawal, no banknotes available to total withdrawal',
-      status: 'not authorized',
-    };
   }
-
-  return {
-    banknotes: validsBanknotes,
-    message: 'Successful withdrawal',
-    status: 'success',
-  };
-};
+}

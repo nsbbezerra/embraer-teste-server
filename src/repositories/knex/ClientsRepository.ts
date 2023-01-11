@@ -1,50 +1,39 @@
 import { database } from '../../database/pg';
 import { ClientsProps, ListClientsProps } from '../../types';
+import { ClientsRepository } from '../clientsRepository';
 
-interface ValidateBalanceProps {
-  value: number;
-  id: number;
+export class KnexClientsRepository implements ClientsRepository {
+  async create(client: ClientsProps): Promise<ClientsProps> {
+    const [newClient] = await database<ListClientsProps>('clients')
+      .insert({
+        balance: client.balance,
+        name: client.name,
+      })
+      .returning(['id', 'name', 'balance']);
+
+    return newClient;
+  }
+
+  async findForBalance(id: number): Promise<{ balance: number } | null> {
+    const clientBalance = await database<ListClientsProps>('clients')
+      .where({ id })
+      .first()
+      .select('balance');
+
+    return !clientBalance ? null : { balance: clientBalance.balance };
+  }
+
+  async updateBalance(id: number, total: number): Promise<void> {
+    await database<ListClientsProps>('clients')
+      .where({ id })
+      .decrement('balance', total);
+  }
+
+  async findClient(name: string): Promise<ListClientsProps | null> {
+    const client =
+      (await database<ListClientsProps>('clients').where({ name }).first()) ||
+      null;
+
+    return client;
+  }
 }
-
-/**
- * @param value number
- * @param id number
- * @returns boolean
- */
-
-export const validateBalance = async ({
-  id,
-  value,
-}: ValidateBalanceProps): Promise<boolean> => {
-  const clientBalance = await database<ListClientsProps>('clients')
-    .where({ id })
-    .first()
-    .select('balance');
-
-  if (!clientBalance || value > Number(clientBalance?.balance)) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
-export const proccessToStoreClient = async (
-  client: ClientsProps
-): Promise<ClientsProps | boolean> => {
-  const searchForDuplicate = await database('clients')
-    .where({ name: client.name })
-    .first();
-
-  if (searchForDuplicate) {
-    return false;
-  }
-
-  const newClient: ListClientsProps[] = await database('clients')
-    .insert({
-      balance: client.balance,
-      name: client.name,
-    })
-    .returning('*');
-
-  return newClient[0];
-};

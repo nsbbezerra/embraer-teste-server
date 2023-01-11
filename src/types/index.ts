@@ -19,10 +19,10 @@ interface BanknotesProps {
 
 interface StatementsProps {
   id: number;
-  client_id: string;
+  client_id: number;
   total: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export type { ClientsProps, BanknotesProps, StatementsProps, ListClientsProps };

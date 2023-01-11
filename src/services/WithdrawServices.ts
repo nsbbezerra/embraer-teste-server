@@ -1,74 +1,91 @@
-interface ValidateBalanceProps {
-  value: number;
-  id: number;
+import { BanksnotesRepository } from '../repositories/banknotesRepository';
+import { BanknotesProps } from '../types';
+
+interface Request {
+  total: number;
+  repository: BanksnotesRepository;
 }
 
-interface HaveBalanceProps {
-  id: number;
-  value: number;
-  repository: ({ value, id }: ValidateBalanceProps) => Promise<boolean>;
+interface Response {
+  banknotes: BanknotesProps[];
 }
 
-interface BanknotesValidToWithdrawProps {
-  id: number;
-  banknoteValue: number;
-  quantity: number;
+function isThereAvailableBanknotes(
+  stock: number,
+  valueToWithdraw: number,
+  banknoteValue: number
+): boolean {
+  const calculateHowMuchBanknotesNeeded = Math.floor(
+    valueToWithdraw / banknoteValue
+  );
+
+  return calculateHowMuchBanknotesNeeded > stock ? false : true;
 }
 
-type CalculateHowMuchBanksnoteNeededResponse = {
-  banknotes: BanknotesValidToWithdrawProps[] | null;
-  status: 'success' | 'not authorized';
-  message: string | undefined;
-};
+function calculateHowMuchBanknotesNeeded(
+  banknoteValue: number,
+  totalToWithdraw: number
+): { restOfValueToWithdraw: number; totalOfBanknotes: number } {
+  let restOfValueToWithdraw = totalToWithdraw;
 
-interface ProccessWithdrawProps {
-  value: number;
-  repository: ({
-    value,
-  }: {
-    value: number;
-  }) => Promise<CalculateHowMuchBanksnoteNeededResponse>;
-}
+  let totalOfBanknotes: number = 0;
 
-/**
- * @param id number
- * @param value number
- * @param  repository ValidateBalanceProps
- * @returns boolean
- */
-
-export const haveBalance = async ({
-  repository,
-  value,
-  id,
-}: HaveBalanceProps) => {
-  return await repository({ value, id });
-};
-
-/**
- * @param value number
- * @returns boolean
- */
-
-export const isValidValueToWithdraw = (value: number): boolean => {
-  if (Number.isInteger(value)) {
-    return true;
-  } else {
-    return false;
+  while (restOfValueToWithdraw >= banknoteValue) {
+    restOfValueToWithdraw = restOfValueToWithdraw - banknoteValue;
+    totalOfBanknotes++;
   }
-};
 
-/**
- * @param repository countBankNotesInMemory | countBankNotes
- * @param value number
- * @returns an object with a `banknote`: Array<BanknotesValidToWithdrawProps> | null, `status`: 'success' | 'not authorized', `message`: string | undefined.
- */
+  return { restOfValueToWithdraw, totalOfBanknotes };
+}
 
-export const proccessWithdraw = async ({
+export const withdraw = async ({
+  total,
   repository,
-  value,
-}: ProccessWithdrawProps): Promise<CalculateHowMuchBanksnoteNeededResponse> => {
-  const data = await repository({ value });
+}: Request): Promise<Response | null> => {
+  if (!Number.isInteger(total)) {
+    throw new Error('Unable to withdraw this amount');
+  }
 
-  return data;
+  const banknotesAvailable = await repository.find();
+
+  let validsWithdrawBanknotes: BanknotesProps[] = [];
+  let balanceOfWithdraw = total;
+
+  banknotesAvailable.map((banknote) => {
+    if (
+      isThereAvailableBanknotes(banknote.amount, total, banknote.banknoteValue)
+    ) {
+      const { restOfValueToWithdraw, totalOfBanknotes } =
+        calculateHowMuchBanknotesNeeded(
+          banknote.banknoteValue,
+          balanceOfWithdraw
+        );
+
+      balanceOfWithdraw = restOfValueToWithdraw;
+
+      totalOfBanknotes !== 0 &&
+        validsWithdrawBanknotes.push({
+          banknoteValue: banknote.banknoteValue,
+          id: banknote.id,
+          amount: totalOfBanknotes,
+        });
+    }
+  });
+
+  const thereIsBalanceAfterCounting = validsWithdrawBanknotes.reduce(
+    (sum, a) => {
+      return sum + a.amount * a.banknoteValue;
+    },
+    0
+  );
+
+  if (thereIsBalanceAfterCounting < total) {
+    throw new Error(
+      `Unable to process withdrawal, no banknotes available to withdrawal this value: R$ ${
+        total - thereIsBalanceAfterCounting
+      }`
+    );
+  }
+
+  return { banknotes: validsWithdrawBanknotes };
 };

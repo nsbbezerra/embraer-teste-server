@@ -1,49 +1,39 @@
 import { clientMock } from '../../mocks/clients';
-import { ClientsProps } from '../../types';
+import { ClientsProps, ListClientsProps } from '../../types';
+import { ClientsRepository } from '../clientsRepository';
 
-interface ValidateBalanceProps {
-  value: number;
-  id: number;
-}
+export class InMemoryClientsRepository implements ClientsRepository {
+  private items: ListClientsProps[] = clientMock;
 
-interface ReturningClientProps {
-  id: number;
-  name: string;
-  balance: number;
-}
+  async create(client: ClientsProps): Promise<ListClientsProps> {
+    const newClient: ListClientsProps = {
+      balance: client.balance,
+      name: client.name,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      id: Math.floor(Math.random() * 10),
+    };
+    this.items.push(newClient);
 
-/**
- * @param value number
- * @param id number
- * @returns boolean
- */
-
-export const validateBalanceInMemory = async ({
-  value,
-  id,
-}: ValidateBalanceProps): Promise<boolean> => {
-  const result = clientMock.find((obj) => obj.id === id);
-
-  if (!result || value > Number(result?.balance)) {
-    return false;
-  } else {
-    return true;
-  }
-};
-
-export const proccessToStoreClientInMemory = async (
-  client: ClientsProps
-): Promise<ClientsProps | boolean> => {
-  const searchForDuplicate = clientMock.find((obj) => obj.name === client.name);
-  if (searchForDuplicate) {
-    return false;
+    return newClient;
   }
 
-  const newClient: ReturningClientProps = {
-    id: Math.floor(Math.random() * 10),
-    balance: client.balance,
-    name: client.name,
-  };
+  async findForBalance(id: number): Promise<{ balance: number } | null> {
+    const clientBalance = this.items.find((obj) => obj.id === Number(id));
 
-  return newClient;
-};
+    return !clientBalance ? null : { balance: clientBalance.balance };
+  }
+
+  async updateBalance(id: number, total: number): Promise<void> {
+    const client = this.items.find((obj) => obj.id === id);
+    if (client) {
+      client.balance = client?.balance - total;
+    }
+  }
+
+  async findClient(name: string): Promise<ListClientsProps | null> {
+    const client = this.items.find((obj) => obj.name === name) || null;
+
+    return client;
+  }
+}

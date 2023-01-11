@@ -10,7 +10,7 @@ const router = Router();
 
 /** CLIENTS */
 
-router.get('/clientBalance', FindForBalance);
+router.get('/getBalance/:id', FindForBalance);
 router.post('/client', StoreClient);
 
 /** WITHDRAW */

@@ -1,14 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
-import { database } from '../../database/pg';
-import { countBankNotes } from '../../repositories/knex/BanknotesRepository';
-import { validateBalance } from '../../repositories/knex/ClientsRepository';
-import { haveBalance, proccessWithdraw } from '../../services/WithdrawServices';
-import { BanknotesProps } from '../../types';
+import { KnexBanknotesRepository } from '../../repositories/knex/BanknotesRepository';
+import { KnexClientsRepository } from '../../repositories/knex/ClientsRepository';
+import { KnexStatementsRepository } from '../../repositories/knex/StatementsRepository';
+import {
+  updateBalance,
+  validateBalanceForWithdraw,
+} from '../../services/ClientBalanceService';
+import { createStatement } from '../../services/CreateStatementService';
+import { updateBanknoteStock } from '../../services/UpdateBanknoteStockService';
+import { withdraw } from '../../services/WithdrawServices';
 
-async function updateBanknotesStock(id: number, newStock: number) {
-  await database<BanknotesProps>('banknotes')
-    .where({ id })
-    .update({ amount: database.raw(`amount - ${newStock}`) });
+async function setUpdateBanknoteStock(id: number, amount: number) {
+  await updateBanknoteStock({
+    id,
+    amount,
+    repository: new KnexBanknotesRepository(),
+  });
 }
 
 async function WithDraw(
@@ -20,30 +27,48 @@ async function WithDraw(
   const { amount } = request.body;
 
   try {
-    if (
-      !(await haveBalance({
-        id: client,
-        repository: validateBalance,
-        value: amount,
-      }))
-    ) {
-      throw new Error('You have no balance to withdraw');
-    }
+    /**
+     * Validate balance of client
+     */
 
-    const { banknotes, message, status } = await proccessWithdraw({
-      value: amount,
-      repository: countBankNotes,
+    await validateBalanceForWithdraw({
+      id: client,
+      total: amount,
+      repository: new KnexClientsRepository(),
     });
 
-    if (status === 'not authorized') {
-      throw new Error(message);
-    }
+    /**
+     * Process withdraw
+     */
 
-    await banknotes?.map((banknote) => {
-      updateBanknotesStock(banknote.id, banknote.quantity);
+    const processWithdraw = await withdraw({
+      total: amount,
+      repository: new KnexBanknotesRepository(),
     });
 
-    return response.status(200).json(banknotes);
+    /** Update banknotes stock */
+
+    await processWithdraw?.banknotes.map((banknote) => {
+      setUpdateBanknoteStock(banknote.id, banknote.amount);
+    });
+
+    /** Update client balance */
+
+    await updateBalance({
+      id: client,
+      total: amount,
+      repository: new KnexClientsRepository(),
+    });
+
+    /** Create a statement of withdraw */
+
+    await createStatement({
+      clientId: client,
+      repository: new KnexStatementsRepository(),
+      total: amount,
+    });
+
+    return response.status(201).json(processWithdraw);
   } catch (error) {
     next(error);
   }
