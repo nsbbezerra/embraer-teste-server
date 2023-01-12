@@ -19,7 +19,8 @@ export class InMemoryStatementsRepository implements StatementsRepository {
   }
 
   async find(clientId: number): Promise<StatementsProps[]> {
-    const statements = this.items.filter((obj) => obj.client_id === clientId);
+    const statements =
+      this.items.filter((obj) => obj.client_id === clientId) || [];
 
     return statements;
   }

@@ -3,11 +3,11 @@ import { KnexClientsRepository } from '../../repositories/knex/ClientsRepository
 import { findForBalance } from '../../services/ClientBalanceService';
 import { createClient } from '../../services/CreateClientServices';
 
-async function FindForBalance(
+export const FindForBalance = async (
   request: Request<{ id: number }, {}, {}>,
   response: Response,
   next: NextFunction
-) {
+) => {
   const { id } = request.params;
 
   try {
@@ -20,13 +20,13 @@ async function FindForBalance(
   } catch (error) {
     next(error);
   }
-}
+};
 
-async function StoreClient(
+export const StoreClient = async (
   request: Request<{}, {}, { name: string; balance: number }>,
   response: Response,
   next: NextFunction
-) {
+) => {
   const { name, balance } = request.body;
 
   try {
@@ -41,6 +41,4 @@ async function StoreClient(
   } catch (error) {
     next(error);
   }
-}
-
-export { FindForBalance, StoreClient };
+};

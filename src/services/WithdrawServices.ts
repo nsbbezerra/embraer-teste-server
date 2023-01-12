@@ -10,6 +10,10 @@ interface Response {
   banknotes: BanknotesProps[];
 }
 
+/**
+ * Validates if the banknotes has stock available to withdraw the required amount
+ */
+
 function isThereAvailableBanknotes(
   stock: number,
   valueToWithdraw: number,
@@ -21,6 +25,10 @@ function isThereAvailableBanknotes(
 
   return calculateHowMuchBanknotesNeeded > stock ? false : true;
 }
+
+/**
+ * Calculates how many banknotes of each value are needed to withdraw
+ */
 
 function calculateHowMuchBanknotesNeeded(
   banknoteValue: number,
@@ -37,6 +45,12 @@ function calculateHowMuchBanknotesNeeded(
 
   return { restOfValueToWithdraw, totalOfBanknotes };
 }
+
+/**
+ * @param total number - total for withdraw
+ * @param repository type BanksnoteRepository
+ * @returns an array `[{ id: number, banknoteValue: number, amount: number }]` or throw an error.
+ */
 
 export const withdraw = async ({
   total,
@@ -81,7 +95,7 @@ export const withdraw = async ({
 
   if (thereIsBalanceAfterCounting < total) {
     throw new Error(
-      `Unable to process withdrawal, no banknotes available to withdrawal this value: R$ ${
+      `Unable to process withdrawal, no banknotes available to withdrawal, this value remains: R$ ${
         total - thereIsBalanceAfterCounting
       }`
     );

@@ -5,6 +5,8 @@ import {
   FindForBalance,
   StoreClient,
 } from '../controllers/clients/ClientsController';
+import { ProcessLogin } from '../controllers/clients/LoginController';
+import { FindClientStatements } from '../controllers/statements/StatementsController';
 
 const router = Router();
 
@@ -18,5 +20,11 @@ router.post('/client', StoreClient);
 router.post('/withdraw/:client', WithDraw);
 
 /** STATEMENTS */
+
+router.get('/statements/:clientId', FindClientStatements);
+
+/** LOGIN */
+
+router.post('/login', ProcessLogin);
 
 export { router };

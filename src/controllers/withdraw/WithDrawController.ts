@@ -6,7 +6,7 @@ import {
   updateBalance,
   validateBalanceForWithdraw,
 } from '../../services/ClientBalanceService';
-import { createStatement } from '../../services/CreateStatementService';
+import { createStatement } from '../../services/StatementsServices';
 import { updateBanknoteStock } from '../../services/UpdateBanknoteStockService';
 import { withdraw } from '../../services/WithdrawServices';
 
@@ -18,11 +18,11 @@ async function setUpdateBanknoteStock(id: number, amount: number) {
   });
 }
 
-async function WithDraw(
+export const WithDraw = async (
   request: Request<{ client: number }, {}, { amount: number }>,
   response: Response,
   next: NextFunction
-) {
+) => {
   const { client } = request.params;
   const { amount } = request.body;
 
@@ -72,6 +72,4 @@ async function WithDraw(
   } catch (error) {
     next(error);
   }
-}
-
-export { WithDraw };
+};

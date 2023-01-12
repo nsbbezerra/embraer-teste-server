@@ -6,6 +6,12 @@ interface Request {
   repository: BanksnotesRepository;
 }
 
+/**
+ * @param id number - id of banknote on database
+ * @param amount number - total of banknotes withdrawals
+ * @param repository type BanknotesRepository
+ */
+
 export const updateBanknoteStock = async ({
   id,
   repository,

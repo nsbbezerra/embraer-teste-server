@@ -10,8 +10,8 @@ type Response = ClientsProps;
 
 /**
  * @param client `id`: number, `name`: string, `balance`: number.
- * @param repository `ClientsRepository` - contains three methods: `create`, `findForBalance`, `updateBalance`.
- * @returns an Promise with a object {`id`: number, `name`: string, `balance`: number}
+ * @param repository type ClientsRepository
+ * @returns an object `{ id: number, name: string, balance: number }`
  */
 
 export const createClient = async ({
