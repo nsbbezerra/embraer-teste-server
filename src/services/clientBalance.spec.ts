@@ -31,7 +31,7 @@ describe('Client Balance Tests', () => {
         total: 4000,
         repository: new InMemoryClientsRepository(),
       })
-    ).resolves.not.toThrow();
+    ).resolves.toHaveProperty('balance');
   });
 
   it('should be have balance of withdraw', async () => {

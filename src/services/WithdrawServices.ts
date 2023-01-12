@@ -56,7 +56,7 @@ export const withdraw = async ({
   total,
   repository,
 }: Request): Promise<Response | null> => {
-  if (!Number.isInteger(total)) {
+  if (!Number.isInteger(total) || total === 0) {
     throw new Error('Unable to withdraw this amount');
   }
 

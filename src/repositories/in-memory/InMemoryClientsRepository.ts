@@ -24,11 +24,12 @@ export class InMemoryClientsRepository implements ClientsRepository {
     return !clientBalance ? null : { balance: clientBalance.balance };
   }
 
-  async updateBalance(id: number, total: number): Promise<void> {
+  async updateBalance(id: number, total: number): Promise<{ balance: number }> {
     const client = this.items.find((obj) => obj.id === id);
     if (client) {
       client.balance = client?.balance - total;
     }
+    return { balance: 0 };
   }
 
   async findClient(name: string): Promise<ListClientsProps | null> {

@@ -54,7 +54,7 @@ export const WithDraw = async (
 
     /** Update client balance */
 
-    await updateBalance({
+    const newBalance = await updateBalance({
       id: client,
       total: amount,
       repository: new KnexClientsRepository(),
@@ -68,7 +68,10 @@ export const WithDraw = async (
       total: amount,
     });
 
-    return response.status(201).json(processWithdraw);
+    const banknotes = processWithdraw?.banknotes;
+    const balance = newBalance.balance;
+
+    return response.status(201).json({ banknotes, balance });
   } catch (error) {
     next(error);
   }

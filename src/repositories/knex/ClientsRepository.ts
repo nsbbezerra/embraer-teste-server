@@ -23,10 +23,13 @@ export class KnexClientsRepository implements ClientsRepository {
     return !clientBalance ? null : { balance: clientBalance.balance };
   }
 
-  async updateBalance(id: number, total: number): Promise<void> {
-    await database<ListClientsProps>('clients')
+  async updateBalance(id: number, total: number): Promise<{ balance: number }> {
+    const [balance] = await database<ListClientsProps>('clients')
       .where({ id })
-      .decrement('balance', total);
+      .decrement('balance', total)
+      .returning('balance');
+
+    return { balance: Number(balance.balance) };
   }
 
   async findClient(name: string): Promise<ListClientsProps | null> {

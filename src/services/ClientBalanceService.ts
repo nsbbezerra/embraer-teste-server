@@ -34,14 +34,17 @@ export const findForBalance = async ({
  * @param id number
  * @param total number - this is a total for update the client balance
  * @param repository type ClientsRepository
+ * @returns an object `{ balance: number }`
  */
 
 export const updateBalance = async ({
   id,
   total,
   repository,
-}: BalanceRequest): Promise<void> => {
-  await repository.updateBalance(id, total);
+}: BalanceRequest): Promise<{ balance: number }> => {
+  const balance = await repository.updateBalance(id, total);
+
+  return balance;
 };
 
 /**
