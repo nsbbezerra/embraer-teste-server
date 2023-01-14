@@ -111,7 +111,18 @@ Para realizar um saque: `POST - {{baseURL}}/withdraw/{clientId}`, passando como 
 "balance": 1000 //Valor atualizado do saldo do cliente
 ```
 
-### 5 - Testes unitários
+### 5 - Erros
+
+Caso ocorra algum erro, ou uma mensagem de validação dos dados será retornado os seguintes dados:
+
+```json
+{
+  "defaultMessage": "An error occurred while processing your request", //Mensagem padrão
+  "errorMessage": "Error on get client balance" //Descrição do erro
+}
+```
+
+### 6 - Testes unitários
 
 Para rodar os teste unitário use o seguinte comando:
 
@@ -121,7 +132,7 @@ $ npm run test
 $ yarn test
 ```
 
-### 6 - Build e produção
+### 7 - Build e produção
 
 Build
 
@@ -139,7 +150,7 @@ $ npm run start
 $ yarn start
 ```
 
-### 7 - Bibliotecas e Frameworks utilizados:
+### 8 - Bibliotecas e Frameworks utilizados:
 
 - [Node JS + Typescript](https://nodejs.org/en/)
 - [Express](https://expressjs.com/pt-br/)

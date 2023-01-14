@@ -4,10 +4,9 @@ import { BanksnotesRepository } from '../banknotesRepository';
 
 export class KnexBanknotesRepository implements BanksnotesRepository {
   async find(): Promise<BanknotesProps[]> {
-    const banknotes = await database<BanknotesProps>('banknotes').orderBy(
-      'banknoteValue',
-      'desc'
-    );
+    const banknotes = await database<BanknotesProps>('banknotes')
+      .orderBy('banknoteValue', 'desc')
+      .select('id', 'amount', 'banknoteValue');
     return banknotes;
   }
 

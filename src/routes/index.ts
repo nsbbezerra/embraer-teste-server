@@ -7,6 +7,7 @@ import {
 } from '../controllers/clients/ClientsController';
 import { ProcessLogin } from '../controllers/clients/LoginController';
 import { FindClientStatements } from '../controllers/statements/StatementsController';
+import { GetBanknotesStock } from '../controllers/banknotes/BanknotesController';
 
 const router = Router();
 
@@ -22,6 +23,10 @@ router.post('/withdraw/:client', WithDraw);
 /** STATEMENTS */
 
 router.get('/statements/:clientId', FindClientStatements);
+
+/** BANKNOTES */
+
+router.get('/banknotes', GetBanknotesStock);
 
 /** LOGIN */
 

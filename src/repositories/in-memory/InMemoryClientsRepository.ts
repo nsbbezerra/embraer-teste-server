@@ -29,7 +29,7 @@ export class InMemoryClientsRepository implements ClientsRepository {
     if (client) {
       client.balance = client?.balance - total;
     }
-    return { balance: 0 };
+    return { balance: client?.balance || 0 };
   }
 
   async findClient(name: string): Promise<ListClientsProps | null> {
